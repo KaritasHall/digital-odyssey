@@ -1,7 +1,6 @@
 import OpenAI from "openai";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 
-// Create an OpenAI API client (that's edge friendly!)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
@@ -12,7 +11,7 @@ export const runtime = "edge";
 const systemMessage: OpenAI.Chat.Completions.ChatCompletionMessageParam = {
   role: "system",
   content:
-    "Behave as a text adventure game. Write your responses in the second person. Limit the chronology of your responses to the moments following any action I dictate. Do not summarize events or advance time in the game's story beyond the outcome of my actions. Use dialogue and concise, but detailed descriptions. At the end of your output include all items that I currently possess. Do not add items that I have not picked up or remove any items that I have not lost, dropped, etc. Game Parameters - Themes:[Mystery, Adventure, Dark]. Format your output like this: {Scenario description}. {Ask player what they want to do}. {Inventory: items in my possession}.",
+    "Behave as a text adventure game full of mystery and wonder. The setting is a medieval fantasy - you cannot reference things from outside this world or current events. After an opening scene guide the player through this structure: The player meets a character that will set them on a journey. The journey is long and perilous, where the player needs to solve riddles and avoid dangerous creatures. After exploring an area the player should find an interesting object. The player has to make a difficult choice that will determine the ending of the game. Write your responses in the second person. Limit the chronology of your outputs to the immediate aftermath of the player's actions. Do not summarize or advance beyond these actions. Include dialogue and detailed descriptions. At the end of each response, list all items the player possesses without adding or removing any, unless specified by the player. Format your responses: {Scenario description}. {Ask player what they want to do?}. {Inventory: player’s items}.",
 };
 
 export async function POST(req: Request) {

@@ -8,13 +8,44 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      keyframes: {
+        slowPulse: {
+          "0%, 100%": {
+            opacity: "1",
+          },
+          "50%": {
+            opacity: "0.5",
+          },
+        },
+        invertPulse: {
+          "0%, 100%": {
+            opacity: "0.3",
+          },
+          "50%": {
+            opacity: "1",
+          },
+        },
+
+        fadeInOut: {
+          "0%, 100%": {
+            opacity: "0",
+          },
+          "50%": {
+            opacity: "1",
+            transform: "scale(1.1)",
+          },
+        },
+      },
+
+      animation: {
+        slowPulse: "slowPulse 4s cubic-bezier(0.4, 0, 0.6, 0.4) infinite",
+        invertPulse: "invertPulse 4s cubic-bezier(0.4, 0, 0.6, 0.4) infinite",
+        fadeIn: "fadeIn 10s infinite",
+        fadeInOut: "fadeInOut 15s infinite",
       },
     },
   },
   plugins: [],
 };
+
 export default config;

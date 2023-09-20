@@ -1,7 +1,8 @@
 "use client";
 
 import { CreateMessage, useChat } from "ai/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { StartScreen } from "./Components/StartScreen/StartScreen";
 
 export default function Chat() {
   const [gameStarted, setGameStarted] = useState(false);
@@ -19,10 +20,10 @@ export default function Chat() {
   }, [append]);
 
   return (
-    <main className="m-20">
+    <main>
       {gameStarted ? (
         <>
-          <section className="mb-auto m">
+          <section className="mb-auto m-20">
             {messages.slice(1).map((m) => (
               <div className="mb-4" key={m.id}>
                 {m.role === "user" ? "User: " : "AI: "}
@@ -30,7 +31,7 @@ export default function Chat() {
               </div>
             ))}
           </section>
-          <form className="flex space-x-4" onSubmit={handleSubmit}>
+          <form className="flex space-x-4 m-20" onSubmit={handleSubmit}>
             <input
               className="rounded-md p-2 text-black"
               value={input}
@@ -46,7 +47,7 @@ export default function Chat() {
           </form>
         </>
       ) : (
-        <button onClick={startGame}>start game</button>
+        <StartScreen startGame={startGame} />
       )}
     </main>
   );
