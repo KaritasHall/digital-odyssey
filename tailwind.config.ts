@@ -8,6 +8,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        storyteller: "var(--color-storyteller)",
+        player: "var(--color-player)",
+        background: "var(--color-background)",
+      },
       keyframes: {
         slowPulse: {
           "0%, 100%": {
@@ -15,14 +20,6 @@ const config: Config = {
           },
           "50%": {
             opacity: "0.5",
-          },
-        },
-        invertPulse: {
-          "0%, 100%": {
-            opacity: "0.3",
-          },
-          "50%": {
-            opacity: "1",
           },
         },
 
@@ -39,8 +36,6 @@ const config: Config = {
 
       animation: {
         slowPulse: "slowPulse 4s cubic-bezier(0.4, 0, 0.6, 0.4) infinite",
-        invertPulse: "invertPulse 4s cubic-bezier(0.4, 0, 0.6, 0.4) infinite",
-        fadeIn: "fadeIn 10s infinite",
         fadeInOut: "fadeInOut 15s infinite",
       },
     },
