@@ -3,9 +3,19 @@
 import { CreateMessage, useChat } from "ai/react";
 import { useCallback, useState } from "react";
 import { StartScreen } from "./Components/StartScreen/StartScreen";
-import { applyTheme } from "../themes/utils";
+import { ThemeName, applyTheme } from "../themes/utils";
 import { themes } from "@/themes";
 import { useEffect } from "react";
+import { useRef } from "react";
+
+// Generate random theme on
+const getRandomTheme = () => {
+  const themeKeys = Object.keys(themes);
+  const randomIndex = Math.floor(Math.random() * themeKeys.length);
+  return themeKeys[randomIndex] as ThemeName;
+};
+
+const RANDOM_THEME = getRandomTheme();
 
 export default function Chat() {
   const [gameStarted, setGameStarted] = useState(false);
@@ -22,26 +32,25 @@ export default function Chat() {
     setGameStarted(true);
   }, [append]);
 
-  // Apply theme
-  const getRandomTheme = () => {
-    const themeKeys = Object.keys(themes);
-    const randomIndex = Math.floor(Math.random() * themeKeys.length);
-    return themeKeys[randomIndex];
-  };
+  // Scrollable div for the game content
+  const divRef = useRef<HTMLDivElement>(null);
 
-  const [theme, setTheme] = useState(getRandomTheme());
-  // Run applyTheme on every new render
+  // Scroll to the bottom of the div when new message is added
   useEffect(() => {
-    return applyTheme(theme);
-  }, [theme]);
+    if (divRef.current) {
+      divRef.current.scrollTop = divRef.current.scrollHeight;
+    }
+  }, [messages]);
 
-  console.log(theme);
+  useEffect(() => {
+    applyTheme(RANDOM_THEME);
+  }, []);
 
   return (
     <main>
       {gameStarted ? (
-        <div>
-          <section className="bg-background h-screen w-full px-20 pt-20">
+        <section className="bg-background h-screen w-full p-10 md:p-20 ">
+          <div className="h-2/3 md:h-1/2 overflow-y-scroll" ref={divRef}>
             {messages.slice(1).map((m) => (
               <div
                 key={m.id}
@@ -52,24 +61,27 @@ export default function Chat() {
                 {m.content}
               </div>
             ))}
+          </div>
 
-            <form className="flex space-x-4 my-20" onSubmit={handleSubmit}>
-              <input
-                className="rounded-md p-2 bg-background text-player w- max-w-[50%]"
-                value={input}
-                onChange={handleInputChange}
-                placeholder="What do you want to do?"
-                aria-label="Player input"
-              />
-              <button
-                className="border-solid border-2 border-white p-2 rounded-md text-white"
-                type="submit"
-              >
-                Send
-              </button>
-            </form>
-          </section>
-        </div>
+          <form
+            className="flex-col flex gap-8 mt-16 md:mt-0 lg:mt-20 items-center md:items-start"
+            onSubmit={handleSubmit}
+          >
+            <input
+              className="rounded-md p-2 bg-background text-player w-full md:w-1/2 lg:w-1/4 placeholder-player placeholder:opacity-80 placeholder:italic focus:placeholder-transparent focus:outline-none border border-player focus:border-none"
+              value={input}
+              onChange={handleInputChange}
+              placeholder="How do you wish to proceed?"
+              aria-label="Player input"
+            />
+            <button
+              className="border-solid border-2 border-storyteller p-2 rounded-md text-storyteller bg-inherit hover:text-player hover:border-player"
+              type="submit"
+            >
+              PROCEED
+            </button>
+          </form>
+        </section>
       ) : (
         <StartScreen startGame={startGame} />
       )}

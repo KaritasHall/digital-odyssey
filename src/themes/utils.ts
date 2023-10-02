@@ -1,12 +1,18 @@
 import { themes } from "./index";
 
+export type ThemeName =
+  | "base"
+  | "forest"
+  | "mansion"
+  | "castle"
+  | "cave"
+  | "rosegarden";
+
 export interface ITheme {
   [key: string]: string;
 }
 
-export interface IThemes {
-  [key: string]: ITheme;
-}
+export type IThemes = Record<ThemeName, ITheme>;
 
 export interface IMappedTheme {
   [key: string]: string | null;
@@ -21,9 +27,13 @@ export const mapTheme = (variables: ITheme): IMappedTheme => {
   };
 };
 
-export const applyTheme = (theme: string): void => {
+export const applyTheme = (theme: ThemeName): void => {
   const themeObject: IMappedTheme = mapTheme(themes[theme]);
-  //   if (!themeObject) return;
+
+  // check if client side, if not return
+  if (typeof window === "undefined") {
+    return;
+  }
 
   const root = document.documentElement;
 
@@ -34,8 +44,4 @@ export const applyTheme = (theme: string): void => {
 
     root.style.setProperty(property, themeObject[property]);
   });
-};
-
-export const extend = (extending: ITheme, newTheme: ITheme): ITheme => {
-  return { ...extending, ...newTheme };
 };
