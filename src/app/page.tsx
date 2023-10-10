@@ -7,6 +7,7 @@ import { ThemeName, applyTheme } from "../themes/utils";
 import { themes } from "@/themes";
 import { useEffect } from "react";
 import { useRef } from "react";
+import { ErrorMessage } from "./api/chat/types";
 
 // Generate random theme on
 const getRandomTheme = () => {
@@ -17,10 +18,18 @@ const getRandomTheme = () => {
 
 const RANDOM_THEME = getRandomTheme();
 
+let errorStatus: ErrorMessage | undefined = undefined;
+
 export default function Chat() {
   const [gameStarted, setGameStarted] = useState(false);
-  const { messages, input, handleInputChange, handleSubmit, append } =
+  const { messages, input, handleInputChange, handleSubmit, append, error } =
     useChat();
+
+  if (error) {
+    errorStatus = JSON.parse(error.message) as ErrorMessage;
+  } else {
+    errorStatus = undefined;
+  }
 
   const startGame = useCallback(() => {
     const initialMessage: CreateMessage = {
@@ -51,16 +60,32 @@ export default function Chat() {
       {gameStarted ? (
         <section className="bg-background h-screen w-full p-10 md:p-20 ">
           <div className="h-2/3 md:h-1/2 overflow-y-scroll" ref={divRef}>
-            {messages.slice(1).map((m) => (
-              <div
-                key={m.id}
-                className={` ${
-                  m.role === "user" ? "text-player py-10" : "text-storyteller"
-                }`}
-              >
-                {m.content}
-              </div>
-            ))}
+            {/* Rate Limit Reached Error */}
+            {errorStatus?.status === 429 && (
+              <h1 className="text-storyteller">
+                Dear friend, the veil between worlds is thickening and our time
+                has run out... <br />
+                {errorStatus.message}
+              </h1>
+            )}
+
+            {/* Other Errors */}
+            {errorStatus !== undefined && errorStatus.status !== 429 && (
+              <h1 className="text-storyteller">{errorStatus.message}</h1>
+            )}
+
+            {/* Messages */}
+            {errorStatus === undefined &&
+              messages.slice(1).map((m) => (
+                <div
+                  key={m.id}
+                  className={` ${
+                    m.role === "user" ? "text-player py-10" : "text-storyteller"
+                  }`}
+                >
+                  {m.content}
+                </div>
+              ))}
           </div>
 
           <form
