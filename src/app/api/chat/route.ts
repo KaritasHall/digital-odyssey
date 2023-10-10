@@ -1,7 +1,6 @@
 import OpenAI from "openai";
 import { OpenAIStream, StreamingTextResponse } from "ai";
 import { NextResponse } from "next/server";
-import { ErrorMessage } from "./types";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -21,7 +20,6 @@ export async function POST(req: Request) {
 
   try {
     const { messages } = await req.json();
-    console.log(messages);
 
     //Ask OpenAI for a streaming chat completion given the prompt
     const response = await openai.chat.completions.create({
@@ -32,36 +30,38 @@ export async function POST(req: Request) {
     // Convert the response into a friendly text-stream
     const stream = OpenAIStream(response);
     // Respond with the stream
-    // return new StreamingTextResponse(stream);
-    throw new Error("I'm a teapot :(");
+    return new StreamingTextResponse(stream);
   } catch (error: any) {
     // Check if the error is an APIError
     if (error instanceof OpenAI.APIError) {
       const { name, status, headers, message } = error;
-
-      const customErrorMessage: ErrorMessage = {
-        name,
-        status: status ?? 500,
-        headers,
-        message,
-      };
-
-      // Override the error message for rate limit errors
-      // if (customErrorMessage.status === 429) {
-      //   customErrorMessage.message = "go away!";
-      // }
-
-      return NextResponse.json(customErrorMessage, { status });
+      return NextResponse.json({ name, status, headers, message }, { status });
     } else {
-      const customErrorMessage: ErrorMessage = {
-        name: "Internal Server Error",
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-        message:
-          "The server was hijacked by goblins, we're working on resolving it",
-      };
-
-      return NextResponse.json(customErrorMessage, { status: 500 });
+      throw error;
     }
   }
+
+  //   // Check if the error is an APIError
+  //   if (error instanceof OpenAI.APIError) {
+  //     const { name, status, headers, message } = error;
+
+  // const customErrorMessage: ErrorMessage = {
+  //   name,
+  //   status: status ?? 500,
+  //   headers,
+  //   message,
+  // };
+
+  //   return NextResponse.json(customErrorMessage, { status });
+  // } else {
+  // const customErrorMessage: ErrorMessage = {
+  //   name: "Internal Server Error",
+  //   status: 500,
+  //   headers: { "Content-Type": "application/json" },
+  //   message:
+  //     "The server was hijacked by goblins, we're working on resolving it",
+  // };
+  // return NextResponse.json(customErrorMessage, { status: 500 });
 }
+//   }
+// }

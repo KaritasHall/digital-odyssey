@@ -27,6 +27,7 @@ export default function Chat() {
 
   if (error) {
     errorStatus = JSON.parse(error.message) as ErrorMessage;
+    console.log("HALLÓ", errorStatus);
   } else {
     errorStatus = undefined;
   }
