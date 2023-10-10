@@ -8,6 +8,8 @@ import { themes } from "@/themes";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { ErrorMessage } from "./api/chat/types";
+import { CoffeeButton } from "./Components/CoffeeButton/CoffeeButton";
+import Link from "next/link";
 
 // Generate random theme on
 const getRandomTheme = () => {
@@ -58,20 +60,26 @@ export default function Chat() {
   return (
     <main>
       {gameStarted ? (
-        <section className="bg-background h-screen w-full p-10 md:p-20 ">
+        <section className="bg-background h-screen w-full px-10 pt-10 md:px-20 md:pt-20 ">
           <div className="h-2/3 md:h-1/2 overflow-y-scroll" ref={divRef}>
             {/* Rate Limit Reached Error */}
             {errorStatus?.status === 429 && (
               <h1 className="text-storyteller">
                 Dear friend, the veil between worlds is thickening and our time
-                has run out... <br />
-                {errorStatus.message}
+                has run out... <br />({errorStatus.message})<br />
+                If you have enjoyed this experience, please consider supporting
+                me by buying me a coffee.
+                <CoffeeButton />
               </h1>
             )}
 
             {/* Other Errors */}
             {errorStatus !== undefined && errorStatus.status !== 429 && (
-              <h1 className="text-storyteller">{errorStatus.message}</h1>
+              <h1 className="text-storyteller">
+                An evil force has prevented me from continuing my story... (
+                {errorStatus.message}) <br />
+                Please try again later, friend.
+              </h1>
             )}
 
             {/* Messages */}
