@@ -27,7 +27,6 @@ export default function Chat() {
 
   if (error) {
     errorStatus = JSON.parse(error.message) as ErrorMessage;
-    console.log("HALLÓ", errorStatus);
   } else {
     errorStatus = undefined;
   }
@@ -66,7 +65,7 @@ export default function Chat() {
               <h1 className="text-storyteller">
                 Dear friend, the veil between worlds is thickening and our time
                 has run out... <br />
-                (Token limit reached - please try again later)
+                {errorStatus.message}
               </h1>
             )}
 

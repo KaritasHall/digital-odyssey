@@ -40,28 +40,4 @@ export async function POST(req: Request) {
       throw error;
     }
   }
-
-  //   // Check if the error is an APIError
-  //   if (error instanceof OpenAI.APIError) {
-  //     const { name, status, headers, message } = error;
-
-  // const customErrorMessage: ErrorMessage = {
-  //   name,
-  //   status: status ?? 500,
-  //   headers,
-  //   message,
-  // };
-
-  //   return NextResponse.json(customErrorMessage, { status });
-  // } else {
-  // const customErrorMessage: ErrorMessage = {
-  //   name: "Internal Server Error",
-  //   status: 500,
-  //   headers: { "Content-Type": "application/json" },
-  //   message:
-  //     "The server was hijacked by goblins, we're working on resolving it",
-  // };
-  // return NextResponse.json(customErrorMessage, { status: 500 });
 }
-//   }
-// }
