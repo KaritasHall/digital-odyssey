@@ -2,17 +2,17 @@
 
 import { CreateMessage, useChat } from "ai/react";
 import { useCallback, useState } from "react";
-import { StartScreen } from "./component/start-screen";
+import { StartScreen } from "./components/start-screen";
 import { ThemeName, applyTheme } from "../themes/utils";
 import { themes } from "@/themes";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { ErrorMessage } from "./api/chat/types";
-import { CoffeeButton } from "./component/coffe-button";
+import { CoffeeButton } from "./components/coffe-button";
 import Link from "next/link";
-import { CoffeeIcon } from "./component/icons/coffee";
-import { GithubIcon } from "./component/icons/github";
-import { LinkedinIcon } from "./component/icons/linkedin";
+import { CoffeeIcon } from "./components/icons/coffee";
+import { GithubIcon } from "./components/icons/github";
+import { LinkedinIcon } from "./components/icons/linkedin";
 
 // Generate random theme on
 const getRandomTheme = () => {
