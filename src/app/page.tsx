@@ -69,17 +69,21 @@ export default function Chat() {
         <section className="bg-background h-screen w-full px-10 pt-10 md:px-20 md:pt-20 flex flex-col items-center justify-between">
           <div className="h-5/6 flex flex-col justify-center w-full max-w-[1100px] text-sm lg:text-base">
             <div
-              className="h-2/4 md:h-1/2 overflow-y-scroll adventure-scrollbar pr-5"
+              className="h-5/6 md:h-1/2 overflow-y-scroll adventure-scrollbar pr-5 relative"
               ref={divRef}
             >
+              <div className="sticky top-0 w-full bg-gradient-to-b h-3 from-background" />
               {/* Rate Limit Reached Error */}
               {errorStatus?.status === 429 && (
                 <>
                   <h1 className="text-storyteller">
                     Dear friend, the veil between worlds is thickening and our
-                    time has run out... <br />({errorStatus.message})<br />
-                    If you have enjoyed this experience, please consider
-                    supporting me by buying me a coffee.
+                    time has run out... <br />
+                    If you are seeing this message it means that the monthly
+                    cost limit for the AI has been reached
+                    <br />
+                    If you enjoyed this experience, you can show your support by
+                    buying me a coffee.
                   </h1>
                   <CoffeeButton />
                 </>
@@ -88,7 +92,7 @@ export default function Chat() {
               {/* Other Errors */}
               {errorStatus !== undefined && errorStatus.status !== 429 && (
                 <h1 className="text-storyteller">
-                  An evil force has prevented me from continuing my story...{" "}
+                  An evil force has prevented me from continuing my story...
                   <br /> ({errorStatus.message}) <br />
                   Please try again later, friend.
                 </h1>
