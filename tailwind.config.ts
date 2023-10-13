@@ -32,15 +32,24 @@ const config: Config = {
             transform: "scale(1.1)",
           },
         },
+        fadeIn: {
+          "0%": {
+            opacity: "0",
+          },
+          "100%": {
+            opacity: "1",
+          },
+        },
       },
 
       animation: {
         slowPulse: "slowPulse 4s cubic-bezier(0.4, 0, 0.6, 0.4) infinite",
         fadeInOut: "fadeInOut 15s infinite",
+        fadeIn: "fadeIn 2s ease-in-out",
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwind-scrollbar-hide")],
 };
 
 export default config;

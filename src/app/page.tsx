@@ -52,7 +52,10 @@ export default function Chat() {
   // Scroll to the bottom of the div when new message is added
   useEffect(() => {
     if (divRef.current) {
-      divRef.current.scrollTop = divRef.current.scrollHeight;
+      divRef.current.scrollTo({
+        top: divRef.current.scrollHeight,
+        behavior: "smooth",
+      });
     }
   }, [messages]);
 
@@ -63,9 +66,12 @@ export default function Chat() {
   return (
     <main>
       {gameStarted ? (
-        <section className="bg-background h-screen w-full px-10 pt-10 md:px-20 md:pt-20 flex flex-col justify-between">
-          <div className="h-5/6">
-            <div className="h-2/4 md:h-1/2 overflow-y-scroll" ref={divRef}>
+        <section className="bg-background h-screen w-full px-10 pt-10 md:px-20 md:pt-20 flex flex-col items-center justify-between">
+          <div className="h-5/6 flex flex-col justify-center w-full max-w-[1100px] text-sm lg:text-base">
+            <div
+              className="h-2/4 md:h-1/2 overflow-y-scroll adventure-scrollbar pr-5"
+              ref={divRef}
+            >
               {/* Rate Limit Reached Error */}
               {errorStatus?.status === 429 && (
                 <>
@@ -93,35 +99,37 @@ export default function Chat() {
                 messages.slice(1).map((m) => (
                   <div
                     key={m.id}
-                    className={` ${
+                    className={
                       m.role === "user"
-                        ? "text-player py-10"
-                        : "text-storyteller"
-                    }`}
+                        ? "text-player py-10 italic"
+                        : "text-storyteller leading-6 lg:leading-7"
+                    }
                   >
                     {m.content}
                   </div>
                 ))}
             </div>
 
-            <form
-              className="flex-col flex gap-8 mt-16 md:mt-0 lg:mt-20 items-center md:items-start"
-              onSubmit={handleSubmit}
-            >
-              <input
-                className="rounded-md p-2 bg-background text-player w-full md:w-1/2 lg:w-1/4 placeholder-player placeholder:opacity-80 placeholder:italic focus:placeholder-transparent focus:outline-none border border-player focus:border-none"
-                value={input}
-                onChange={handleInputChange}
-                placeholder="How do you wish to proceed?"
-                aria-label="Player input"
-              />
-              <button
-                className="border-solid border-2 border-storyteller p-2 rounded-md text-storyteller bg-inherit hover:text-player hover:border-player"
-                type="submit"
+            {messages.length >= 2 && (
+              <form
+                className="flex-col flex gap-8 mt-16 lg:mt-20 items-center md:items-start animate-fadeIn"
+                onSubmit={handleSubmit}
               >
-                PROCEED
-              </button>
-            </form>
+                <input
+                  className="rounded-md p-2 bg-background text-player w-full md:w-1/2 placeholder-player placeholder:opacity-80 placeholder:italic focus:outline-none focus:placeholder-transparent border border-player"
+                  value={input}
+                  onChange={handleInputChange}
+                  placeholder="How do you wish to proceed?"
+                  aria-label="Player input"
+                />
+                <button
+                  className="border-solid border-2 border-storyteller p-2 rounded-md text-storyteller bg-inherit hover:text-player hover:border-player"
+                  type="submit"
+                >
+                  PROCEED
+                </button>
+              </form>
+            )}
           </div>
 
           <footer className="justify-center flex gap-8 text-player mb-5 md:mb-10">

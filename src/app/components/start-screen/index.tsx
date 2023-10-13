@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export const StartScreen = ({ startGame }: { startGame: () => void }) => {
   return (
-    <div className="h-screen relative flex justify-center">
+    <div className="h-screen overflow-hidden relative flex justify-center">
       <div>
         <Image
           src={nebula4}
