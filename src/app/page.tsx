@@ -66,13 +66,13 @@ export default function Chat() {
   return (
     <main>
       {gameStarted ? (
-        <section className="bg-background h-screen w-full px-10 pt-10 md:px-20 md:pt-20 flex flex-col items-center justify-between">
-          <div className="h-5/6 flex flex-col justify-center w-full max-w-[1100px] text-sm lg:text-base">
+        <section className="bg-background h-[100dvh] w-full flex flex-col items-center justify-between">
+          <div className="flex flex-col w-full max-w-[1100px] text-sm lg:text-base h-[calc(100%-44px)] lg:h-[calc(100%-64px)] relative pt-10">
             <div
-              className="h-5/6 md:h-1/2 overflow-y-scroll adventure-scrollbar pr-5 relative"
+              className="overflow-y-scroll adventure-scrollbar relative h-[calc(100%-166px)] lg:h-[calc(100%-206px)] px-6 lg:px-0"
               ref={divRef}
             >
-              <div className="sticky top-0 w-full bg-gradient-to-b h-3 from-background" />
+              <div className="sticky top-0 w-full bg-gradient-to-b h-6 from-background" />
               {/* Rate Limit Reached Error */}
               {errorStatus?.status === 429 && (
                 <>
@@ -116,7 +116,7 @@ export default function Chat() {
 
             {messages.length >= 2 && (
               <form
-                className="flex-col flex gap-8 mt-16 lg:mt-20 items-center md:items-start animate-fadeIn"
+                className="flex-col w-full flex gap-8 items-center justify-center md:items-start animate-fadeIn bottom-0 absolute px-6 lg:px-0 h-[166px] lg:h-[206px]"
                 onSubmit={handleSubmit}
               >
                 <input
@@ -135,8 +135,8 @@ export default function Chat() {
               </form>
             )}
           </div>
-
-          <footer className="justify-center flex gap-8 text-player mb-5 md:mb-10">
+          {/* Actual height 44px on mobile or 64px for md + */}
+          <footer className="justify-center h-[44px] lg:h-[64px] flex gap-8 text-player">
             <Link
               target="_blank"
               href="www.linkedin.com/in/karitas-w-halldórsdóttir-151b86159"

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  box-sizing: border-box;
+}
+
 .adventure-scrollbar::-webkit-scrollbar {
   background-color: transparent;
   width: 0.5rem;
