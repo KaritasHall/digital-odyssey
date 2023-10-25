@@ -1,5 +1,12 @@
 import "./globals.css";
 import { Metadata } from "next";
+import { Bitter } from "@next/font/google";
+
+const bitter = Bitter({
+  weight: ["400", "700"],
+  style: "normal",
+  subsets: ["latin-ext"],
+});
 
 export const metadata: Metadata = {
   title: "Digital Odyssey",
@@ -17,7 +24,7 @@ export default function RootLayout({
         <link rel="icon" href="/icon.png" />
       </head>
 
-      <body>{children}</body>
+      <body className={bitter.className}>{children}</body>
     </html>
   );
 }

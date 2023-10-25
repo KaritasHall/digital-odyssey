@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+.adventure-scrollbar::-webkit-scrollbar {
+  background-color: transparent;
+  width: 0.5rem;
+}
+
+.adventure-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-player);
+  border-radius: 1rem;
+}
