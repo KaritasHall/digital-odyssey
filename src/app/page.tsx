@@ -13,6 +13,7 @@ import Link from "next/link";
 import { CoffeeIcon } from "./components/icons/coffee";
 import { GithubIcon } from "./components/icons/github";
 import { LinkedinIcon } from "./components/icons/linkedin";
+import { useSession } from "next-auth/react";
 
 // Generate random theme on
 const getRandomTheme = () => {
@@ -29,6 +30,9 @@ export default function Chat() {
   const [gameStarted, setGameStarted] = useState(false);
   const { messages, input, handleInputChange, handleSubmit, append, error } =
     useChat();
+
+  const { data: session, status } = useSession();
+  console.log(session, status);
 
   if (error) {
     errorStatus = JSON.parse(error.message) as ErrorMessage;
