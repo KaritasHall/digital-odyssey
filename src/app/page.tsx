@@ -14,6 +14,7 @@ import { CoffeeIcon } from "./components/icons/coffee";
 import { GithubIcon } from "./components/icons/github";
 import { LinkedinIcon } from "./components/icons/linkedin";
 import { useSession } from "next-auth/react";
+import { AuthButton } from "./components/auth-button";
 
 // Generate random theme on
 const getRandomTheme = () => {
@@ -31,6 +32,7 @@ export default function Chat() {
   const { messages, input, handleInputChange, handleSubmit, append, error } =
     useChat();
 
+  // If user is logged in, get session data
   const { data: session, status } = useSession();
   console.log(session, status);
 
@@ -71,6 +73,9 @@ export default function Chat() {
     <main>
       {gameStarted ? (
         <section className="bg-background h-[100dvh] w-full flex flex-col items-center justify-between">
+          <div className="w-full">
+            <AuthButton />
+          </div>
           <div className="flex flex-col w-full max-w-[1100px] text-sm lg:text-base h-[calc(100%-44px)] lg:h-[calc(100%-64px)] relative pt-10">
             <div
               className="overflow-y-scroll adventure-scrollbar relative h-[calc(100%-166px)] lg:h-[calc(100%-206px)] px-6 lg:px-0"

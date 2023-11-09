@@ -1,4 +1,7 @@
 import GoogleProvider from "next-auth/providers/google";
+import { FirestoreAdapter } from "@auth/firebase-adapter";
+import { firestore } from "@/app/firebase/admin";
+// import { cert } from "firebase-admin/app";
 
 export const authOptions = {
   providers: [
@@ -7,4 +10,6 @@ export const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     }),
   ],
+  // Authenticate users with Firebase
+  adapter: FirestoreAdapter(firestore),
 };

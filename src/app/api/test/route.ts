@@ -1,8 +1,15 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/auth-options";
 import admin from "@/app/firebase/admin";
+import OpenAI from "openai";
 
 const db = admin.firestore();
+
+interface Adventure {
+  initialSystemMessage: string;
+  initialUserMessage: string;
+  messages: OpenAI.Chat.Completions.ChatCompletionMessageParam;
+}
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -11,19 +18,33 @@ export async function GET() {
   if (!session || !session.user || !session.user.email) {
     return new Response("No session", { status: 401 });
   }
-  // Update the user in the database and set name to the user's name
-  await db
-    .collection("users")
-    .doc(session.user.email)
-    .set({ name: session.user.name }, { merge: true });
 
-  // Get the user's data from the database
-  const user = await db
-    .collection("users")
-    .doc(session.user.email)
-    .get()
-    .then((doc) => doc.data());
+  const adventureDocument = await db
+    .collection("adventures")
+    .where("user", "==", session.user.email)
+    .get();
 
-  console.log(session);
-  return Response.json(user);
+  const adventureData = adventureDocument.docs.map((doc) =>
+    doc.data()
+  ) as Adventure[];
+
+  const adventures = adventureData.map((adventure) => {
+    const combinedMessages = [];
+
+    combinedMessages.push({
+      role: "system",
+      content: adventure.initialSystemMessage,
+    });
+    combinedMessages.push({
+      role: "user",
+      content: adventure.initialUserMessage,
+    });
+    combinedMessages.push({
+      ...adventure.messages,
+    });
+
+    return combinedMessages;
+  });
+
+  return Response.json(adventures);
 }
