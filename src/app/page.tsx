@@ -16,7 +16,7 @@ import { useSession } from "next-auth/react";
 import { AuthButton } from "./components/auth-button";
 import saveGame, { Adventure } from "./components/save-game";
 
-// Generate random theme on
+// Generate random theme on page load
 const getRandomTheme = () => {
   const themeKeys = Object.keys(themes);
   const randomIndex = Math.floor(Math.random() * themeKeys.length);
@@ -85,6 +85,15 @@ export default function Chat() {
   // Fetch saved game = user is logged in
   const startGame = useCallback(async () => {
     if (status === "authenticated") {
+      // If there is a saved game in local storage, load that
+      const tempGameState = localStorage.getItem("tempGameState");
+      if (tempGameState) {
+        const savedAdventure = JSON.parse(tempGameState) as Message[];
+        setMessages(savedAdventure);
+        localStorage.removeItem("tempGameState"); // Clear the temporary storage
+        setGameStarted(true);
+        return;
+      }
       const response = await fetch("/api/adventures");
       if (response.status === 404) {
         startNewGame();
@@ -94,7 +103,6 @@ export default function Chat() {
       const data = (await response.json()) as Adventure;
 
       const savedAdventure: Message[] = [];
-
       // Initial message
       savedAdventure.push({
         id: "initial",
@@ -118,6 +126,13 @@ export default function Chat() {
     }
   }, [setMessages, startNewGame, status]);
 
+  // Auto start game if user is logged in
+  useEffect(() => {
+    if (status === "authenticated") {
+      startGame();
+    }
+  }, [status, startGame]);
+
   // Scrollable div for the game content
   const divRef = useRef<HTMLDivElement>(null);
 
@@ -140,7 +155,7 @@ export default function Chat() {
       {gameStarted ? (
         <section className="bg-background h-[100dvh] w-full flex flex-col items-center justify-between">
           <div className="w-full">
-            <AuthButton />
+            <AuthButton gameStarted={gameStarted} messages={messages} />
           </div>
           <div className="flex flex-col w-full max-w-[1100px] text-sm lg:text-base h-[calc(100%-44px)] lg:h-[calc(100%-64px)] relative pt-10">
             <div
