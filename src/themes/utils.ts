@@ -19,7 +19,6 @@ export interface IMappedTheme {
 }
 
 export const mapTheme = (variables: ITheme): IMappedTheme => {
-  console.log("mapping");
   return {
     "--color-storyteller": variables.storyteller || "",
     "--color-player": variables.player || "",

@@ -1,6 +1,5 @@
 "use client";
-
-import { CreateMessage, useChat } from "ai/react";
+import { CreateMessage, Message, useChat } from "ai/react";
 import { useCallback, useState } from "react";
 import { StartScreen } from "./components/start-screen";
 import { ThemeName, applyTheme } from "../themes/utils";
@@ -15,6 +14,7 @@ import { GithubIcon } from "./components/icons/github";
 import { LinkedinIcon } from "./components/icons/linkedin";
 import { useSession } from "next-auth/react";
 import { AuthButton } from "./components/auth-button";
+import saveGame, { Adventure } from "./components/save-game";
 
 // Generate random theme on
 const getRandomTheme = () => {
@@ -28,13 +28,42 @@ const RANDOM_THEME = getRandomTheme();
 let errorStatus: ErrorMessage | undefined = undefined;
 
 export default function Chat() {
+  const [savedMessageCount, setSavedMessageCount] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
-  const { messages, input, handleInputChange, handleSubmit, append, error } =
-    useChat();
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    append,
+    error,
+    isLoading,
+    setMessages,
+  } = useChat();
 
-  // If user is logged in, get session data
-  const { data: session, status } = useSession();
-  console.log(session, status);
+  // Save game to database. Only save if there are new messages.
+  const saveChat = useCallback(() => {
+    if (messages.length > savedMessageCount) {
+      const adventure: Adventure = {
+        initialUserMessage: messages[0].content,
+        messages: messages.slice(1).map((m) => ({
+          content: m.content,
+          role: m.role,
+        })),
+      };
+      saveGame(adventure);
+      setSavedMessageCount(messages.length);
+    }
+  }, [messages, savedMessageCount]);
+
+  // Only save when message has been sent to user (not mid stream)
+  useEffect(() => {
+    if (isLoading === false && messages.length > 0) {
+      saveChat();
+    }
+  }, [isLoading, messages.length, saveChat]);
+
+  const { status } = useSession();
 
   if (error) {
     errorStatus = JSON.parse(error.message) as ErrorMessage;
@@ -42,7 +71,8 @@ export default function Chat() {
     errorStatus = undefined;
   }
 
-  const startGame = useCallback(() => {
+  // New game = user is not logged in
+  const startNewGame = useCallback(() => {
     const initialMessage: CreateMessage = {
       role: "user",
       content: "Create an opening scene for my text adventure game.",
@@ -51,6 +81,42 @@ export default function Chat() {
     append(initialMessage);
     setGameStarted(true);
   }, [append]);
+
+  // Fetch saved game = user is logged in
+  const startGame = useCallback(async () => {
+    if (status === "authenticated") {
+      const response = await fetch("/api/adventures");
+      if (response.status === 404) {
+        startNewGame();
+        return;
+      }
+
+      const data = (await response.json()) as Adventure;
+
+      const savedAdventure: Message[] = [];
+
+      // Initial message
+      savedAdventure.push({
+        id: "initial",
+        role: "user",
+        content: data.initialUserMessage,
+      });
+
+      // Rest of the messages
+      data.messages.forEach((message, index) => {
+        savedAdventure.push({
+          id: index.toString(),
+          role: message.role,
+          content: message.content ?? "",
+        });
+      });
+
+      setMessages(savedAdventure);
+      setGameStarted(true);
+    } else {
+      startNewGame();
+    }
+  }, [setMessages, startNewGame, status]);
 
   // Scrollable div for the game content
   const divRef = useRef<HTMLDivElement>(null);

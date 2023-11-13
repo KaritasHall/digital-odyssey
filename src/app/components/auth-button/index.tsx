@@ -3,7 +3,6 @@ import { signIn, signOut } from "next-auth/react";
 
 export const AuthButton = () => {
   const { data: session, status } = useSession();
-  console.log(session, status);
   return (
     <div className="text-player p-2">
       {/* If user is logged in */}
