@@ -3,6 +3,8 @@ import { useSession } from "next-auth/react";
 import { signIn, signOut } from "next-auth/react";
 import { ResetButton } from "../reset-button";
 
+export const TEMP_GAME_STATE_LOCALSTORAGE = "tempGameState";
+
 interface AuthButtonProps {
   gameStarted: boolean;
   messages: Message[];
@@ -15,7 +17,10 @@ export const AuthButton = ({ gameStarted, messages }: AuthButtonProps) => {
   const saveGameStateTemporarily = () => {
     // Your implementation to save the game state
     if (gameStarted && messages.length > 0) {
-      localStorage.setItem("tempGameState", JSON.stringify(messages));
+      localStorage.setItem(
+        TEMP_GAME_STATE_LOCALSTORAGE,
+        JSON.stringify(messages)
+      );
     }
   };
 

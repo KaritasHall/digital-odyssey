@@ -16,6 +16,7 @@ import { useSession } from "next-auth/react";
 import { AuthButton } from "./components/auth-button";
 import saveGame, { Adventure } from "./components/save-game";
 import { promptUserForSessionChoice } from "./components/prompt-user";
+import { TEMP_GAME_STATE_LOCALSTORAGE } from "./components/auth-button";
 
 // Generate random theme on page load
 const getRandomTheme = () => {
@@ -110,7 +111,7 @@ export default function Chat() {
     // When user starts new game without logging in, it gets saved to local storage
     // This allows new users to continue their game after logging in
     if (status === "authenticated") {
-      const tempGameState = localStorage.getItem("tempGameState");
+      const tempGameState = localStorage.getItem(TEMP_GAME_STATE_LOCALSTORAGE);
       const response = await fetch("/api/adventures");
       const sessionExistsInDb = response.status !== 404;
 
@@ -123,11 +124,11 @@ export default function Chat() {
         if (userChoice === "LOCAL_STORAGE") {
           const savedAdventure = JSON.parse(tempGameState) as Message[];
           setMessages(savedAdventure);
-          localStorage.removeItem("tempGameState");
+          localStorage.removeItem(TEMP_GAME_STATE_LOCALSTORAGE);
         } else if (userChoice === "DATABASE") {
           const data = (await response.json()) as Adventure;
           loadAdventureFromDatabase(data);
-          localStorage.removeItem("tempGameState");
+          localStorage.removeItem(TEMP_GAME_STATE_LOCALSTORAGE);
         }
         setGameStarted(true);
         return;
@@ -136,7 +137,7 @@ export default function Chat() {
       if (tempGameState) {
         const savedAdventure = JSON.parse(tempGameState) as Message[];
         setMessages(savedAdventure);
-        localStorage.removeItem("tempGameState");
+        localStorage.removeItem(TEMP_GAME_STATE_LOCALSTORAGE);
         setGameStarted(true);
         return;
       }

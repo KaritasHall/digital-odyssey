@@ -1,7 +1,9 @@
+import "server-only";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/auth-options";
 import admin from "@/app/firebase/admin";
 import OpenAI from "openai";
+import { NextRequest } from "next/server";
 
 const db = admin.firestore();
 
@@ -12,7 +14,7 @@ interface Adventure {
 }
 
 // Post new adventure to the database
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   const data = await req.json();
 
