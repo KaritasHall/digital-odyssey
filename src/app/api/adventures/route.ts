@@ -61,3 +61,17 @@ export async function GET() {
 
   return Response.json(adventureData);
 }
+
+// Delete the adventure for the current user
+export async function DELETE() {
+  const session = await getServerSession(authOptions);
+
+  // If no session exists, return an error
+  if (!session || !session.user || !session.user.email) {
+    return new Response("No session", { status: 401 });
+  }
+
+  await db.collection("adventures").doc(session.user.email).delete();
+
+  return Response.json({ status: "deleted" });
+}

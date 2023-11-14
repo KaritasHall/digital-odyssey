@@ -1,6 +1,7 @@
 import { Message } from "ai";
 import { useSession } from "next-auth/react";
 import { signIn, signOut } from "next-auth/react";
+import { ResetButton } from "../reset-button";
 
 interface AuthButtonProps {
   gameStarted: boolean;
@@ -39,7 +40,13 @@ export const AuthButton = ({ gameStarted, messages }: AuthButtonProps) => {
       {session ? (
         <div className="text-xs flex justify-between">
           Hi, {session.user?.name} <br />
-          <button className="hover:text-storyteller text-sm">Log out</button>
+          <ResetButton />
+          <button
+            className="hover:text-storyteller text-sm"
+            onClick={handleAuth}
+          >
+            Log out
+          </button>
         </div>
       ) : (
         // If user is not logged in

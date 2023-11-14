@@ -15,6 +15,7 @@ import { LinkedinIcon } from "./components/icons/linkedin";
 import { useSession } from "next-auth/react";
 import { AuthButton } from "./components/auth-button";
 import saveGame, { Adventure } from "./components/save-game";
+import { promptUserForSessionChoice } from "./components/prompt-user";
 
 // Generate random theme on page load
 const getRandomTheme = () => {
@@ -28,6 +29,7 @@ const RANDOM_THEME = getRandomTheme();
 let errorStatus: ErrorMessage | undefined = undefined;
 
 export default function Chat() {
+  const [kickstartedGame, setKickstartedGame] = useState(false);
   const [savedMessageCount, setSavedMessageCount] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const {
@@ -41,6 +43,8 @@ export default function Chat() {
     setMessages,
   } = useChat();
 
+  const { status } = useSession();
+
   // Save game to database. Only save if there are new messages.
   const saveChat = useCallback(() => {
     if (messages.length > savedMessageCount) {
@@ -51,10 +55,12 @@ export default function Chat() {
           role: m.role,
         })),
       };
-      saveGame(adventure);
+      if (status === "authenticated") {
+        saveGame(adventure);
+      }
       setSavedMessageCount(messages.length);
     }
-  }, [messages, savedMessageCount]);
+  }, [messages, savedMessageCount, status]);
 
   // Only save when message has been sent to user (not mid stream)
   useEffect(() => {
@@ -62,8 +68,6 @@ export default function Chat() {
       saveChat();
     }
   }, [isLoading, messages.length, saveChat]);
-
-  const { status } = useSession();
 
   if (error) {
     errorStatus = JSON.parse(error.message) as ErrorMessage;
@@ -84,33 +88,15 @@ export default function Chat() {
 
   // Fetch saved game = user is logged in
   const startGame = useCallback(async () => {
-    if (status === "authenticated") {
-      // If there is a saved game in local storage, load that
-      const tempGameState = localStorage.getItem("tempGameState");
-      if (tempGameState) {
-        const savedAdventure = JSON.parse(tempGameState) as Message[];
-        setMessages(savedAdventure);
-        localStorage.removeItem("tempGameState"); // Clear the temporary storage
-        setGameStarted(true);
-        return;
-      }
-      const response = await fetch("/api/adventures");
-      if (response.status === 404) {
-        startNewGame();
-        return;
-      }
-
-      const data = (await response.json()) as Adventure;
-
+    // Load saved game from database (we need the initial message + all following messages)
+    function loadAdventureFromDatabase(data: Adventure) {
       const savedAdventure: Message[] = [];
-      // Initial message
       savedAdventure.push({
         id: "initial",
         role: "user",
         content: data.initialUserMessage,
       });
 
-      // Rest of the messages
       data.messages.forEach((message, index) => {
         savedAdventure.push({
           id: index.toString(),
@@ -120,7 +106,49 @@ export default function Chat() {
       });
 
       setMessages(savedAdventure);
-      setGameStarted(true);
+    }
+    // When user starts new game without logging in, it gets saved to local storage
+    // This allows new users to continue their game after logging in
+    if (status === "authenticated") {
+      const tempGameState = localStorage.getItem("tempGameState");
+      const response = await fetch("/api/adventures");
+      const sessionExistsInDb = response.status !== 404;
+
+      // If both local storage and database session exists for the user
+      // Prompt user to choose between the two
+      if (tempGameState && sessionExistsInDb) {
+        // Prompt user to choose between local storage session or database session
+        const userChoice = await promptUserForSessionChoice();
+
+        if (userChoice === "LOCAL_STORAGE") {
+          const savedAdventure = JSON.parse(tempGameState) as Message[];
+          setMessages(savedAdventure);
+          localStorage.removeItem("tempGameState");
+        } else if (userChoice === "DATABASE") {
+          const data = (await response.json()) as Adventure;
+          loadAdventureFromDatabase(data);
+          localStorage.removeItem("tempGameState");
+        }
+        setGameStarted(true);
+        return;
+      }
+
+      if (tempGameState) {
+        const savedAdventure = JSON.parse(tempGameState) as Message[];
+        setMessages(savedAdventure);
+        localStorage.removeItem("tempGameState");
+        setGameStarted(true);
+        return;
+      }
+
+      if (sessionExistsInDb) {
+        const data = (await response.json()) as Adventure;
+        loadAdventureFromDatabase(data);
+        setGameStarted(true);
+        return;
+      }
+
+      startNewGame();
     } else {
       startNewGame();
     }
@@ -128,15 +156,16 @@ export default function Chat() {
 
   // Auto start game if user is logged in
   useEffect(() => {
-    if (status === "authenticated") {
+    if (status === "authenticated" && !gameStarted && !kickstartedGame) {
+      setKickstartedGame(true);
       startGame();
     }
-  }, [status, startGame]);
+  }, [status, setGameStarted, startGame, gameStarted, kickstartedGame]);
 
   // Scrollable div for the game content
   const divRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to the bottom of the div when new message is added
+  // Div scrolls to the bottom of the div when new message is added
   useEffect(() => {
     if (divRef.current) {
       divRef.current.scrollTo({
