@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Metadata } from "next";
 import { Bitter } from "@next/font/google";
+import Providers from "@/app/components/providers";
 
 const bitter = Bitter({
   weight: ["400", "700"],
@@ -24,7 +25,9 @@ export default function RootLayout({
         <link rel="icon" href="/icon.png" />
       </head>
 
-      <body className={bitter.className}>{children}</body>
+      <body className={bitter.className}>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

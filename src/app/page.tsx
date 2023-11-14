@@ -1,6 +1,5 @@
 "use client";
-
-import { CreateMessage, useChat } from "ai/react";
+import { CreateMessage, Message, useChat } from "ai/react";
 import { useCallback, useState } from "react";
 import { StartScreen } from "./components/start-screen";
 import { ThemeName, applyTheme } from "../themes/utils";
@@ -13,8 +12,13 @@ import Link from "next/link";
 import { CoffeeIcon } from "./components/icons/coffee";
 import { GithubIcon } from "./components/icons/github";
 import { LinkedinIcon } from "./components/icons/linkedin";
+import { useSession } from "next-auth/react";
+import { AuthButton } from "./components/auth-button";
+import saveGame, { Adventure } from "./components/save-game";
+import { promptUserForSessionChoice } from "./components/prompt-user";
+import { TEMP_GAME_STATE_LOCALSTORAGE } from "./components/auth-button";
 
-// Generate random theme on
+// Generate random theme on page load
 const getRandomTheme = () => {
   const themeKeys = Object.keys(themes);
   const randomIndex = Math.floor(Math.random() * themeKeys.length);
@@ -26,9 +30,45 @@ const RANDOM_THEME = getRandomTheme();
 let errorStatus: ErrorMessage | undefined = undefined;
 
 export default function Chat() {
+  const [kickstartedGame, setKickstartedGame] = useState(false);
+  const [savedMessageCount, setSavedMessageCount] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
-  const { messages, input, handleInputChange, handleSubmit, append, error } =
-    useChat();
+  const {
+    messages,
+    input,
+    handleInputChange,
+    handleSubmit,
+    append,
+    error,
+    isLoading,
+    setMessages,
+  } = useChat();
+
+  const { status } = useSession();
+
+  // Save game to database. Only save if there are new messages.
+  const saveChat = useCallback(() => {
+    if (messages.length > savedMessageCount) {
+      const adventure: Adventure = {
+        initialUserMessage: messages[0].content,
+        messages: messages.slice(1).map((m) => ({
+          content: m.content,
+          role: m.role,
+        })),
+      };
+      if (status === "authenticated") {
+        saveGame(adventure);
+      }
+      setSavedMessageCount(messages.length);
+    }
+  }, [messages, savedMessageCount, status]);
+
+  // Only save when message has been sent to user (not mid stream)
+  useEffect(() => {
+    if (isLoading === false && messages.length > 0) {
+      saveChat();
+    }
+  }, [isLoading, messages.length, saveChat]);
 
   if (error) {
     errorStatus = JSON.parse(error.message) as ErrorMessage;
@@ -36,7 +76,8 @@ export default function Chat() {
     errorStatus = undefined;
   }
 
-  const startGame = useCallback(() => {
+  // New game = user is not logged in
+  const startNewGame = useCallback(() => {
     const initialMessage: CreateMessage = {
       role: "user",
       content: "Create an opening scene for my text adventure game.",
@@ -46,10 +87,86 @@ export default function Chat() {
     setGameStarted(true);
   }, [append]);
 
+  // Fetch saved game = user is logged in
+  const startGame = useCallback(async () => {
+    // Load saved game from database (we need the initial message + all following messages)
+    function loadAdventureFromDatabase(data: Adventure) {
+      const savedAdventure: Message[] = [];
+      savedAdventure.push({
+        id: "initial",
+        role: "user",
+        content: data.initialUserMessage,
+      });
+
+      data.messages.forEach((message, index) => {
+        savedAdventure.push({
+          id: index.toString(),
+          role: message.role,
+          content: message.content ?? "",
+        });
+      });
+
+      setMessages(savedAdventure);
+    }
+    // When user starts new game without logging in, it gets saved to local storage
+    // This allows new users to continue their game after logging in
+    if (status === "authenticated") {
+      const tempGameState = localStorage.getItem(TEMP_GAME_STATE_LOCALSTORAGE);
+      const response = await fetch("/api/adventures");
+      const sessionExistsInDb = response.status !== 404;
+
+      // If both local storage and database session exists for the user
+      // Prompt user to choose between the two
+      if (tempGameState && sessionExistsInDb) {
+        // Prompt user to choose between local storage session or database session
+        const userChoice = await promptUserForSessionChoice();
+
+        if (userChoice === "LOCAL_STORAGE") {
+          const savedAdventure = JSON.parse(tempGameState) as Message[];
+          setMessages(savedAdventure);
+          localStorage.removeItem(TEMP_GAME_STATE_LOCALSTORAGE);
+        } else if (userChoice === "DATABASE") {
+          const data = (await response.json()) as Adventure;
+          loadAdventureFromDatabase(data);
+          localStorage.removeItem(TEMP_GAME_STATE_LOCALSTORAGE);
+        }
+        setGameStarted(true);
+        return;
+      }
+
+      if (tempGameState) {
+        const savedAdventure = JSON.parse(tempGameState) as Message[];
+        setMessages(savedAdventure);
+        localStorage.removeItem(TEMP_GAME_STATE_LOCALSTORAGE);
+        setGameStarted(true);
+        return;
+      }
+
+      if (sessionExistsInDb) {
+        const data = (await response.json()) as Adventure;
+        loadAdventureFromDatabase(data);
+        setGameStarted(true);
+        return;
+      }
+
+      startNewGame();
+    } else {
+      startNewGame();
+    }
+  }, [setMessages, startNewGame, status]);
+
+  // Auto start game if user is logged in
+  useEffect(() => {
+    if (status === "authenticated" && !gameStarted && !kickstartedGame) {
+      setKickstartedGame(true);
+      startGame();
+    }
+  }, [status, setGameStarted, startGame, gameStarted, kickstartedGame]);
+
   // Scrollable div for the game content
   const divRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to the bottom of the div when new message is added
+  // Div scrolls to the bottom of the div when new message is added
   useEffect(() => {
     if (divRef.current) {
       divRef.current.scrollTo({
@@ -67,6 +184,9 @@ export default function Chat() {
     <main>
       {gameStarted ? (
         <section className="bg-background h-[100dvh] w-full flex flex-col items-center justify-between">
+          <div className="w-full">
+            <AuthButton gameStarted={gameStarted} messages={messages} />
+          </div>
           <div className="flex flex-col w-full max-w-[1100px] text-sm lg:text-base h-[calc(100%-44px)] lg:h-[calc(100%-64px)] relative pt-10">
             <div
               className="overflow-y-scroll adventure-scrollbar relative h-[calc(100%-166px)] lg:h-[calc(100%-206px)] px-6 lg:px-0"
