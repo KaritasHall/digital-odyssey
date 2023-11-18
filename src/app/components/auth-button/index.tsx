@@ -1,11 +1,10 @@
 import { Message } from "ai";
 import { useSession } from "next-auth/react";
 import { signIn, signOut } from "next-auth/react";
-import { ResetButton } from "../reset-button";
 
 export const TEMP_GAME_STATE_LOCALSTORAGE = "tempGameState";
 
-interface AuthButtonProps {
+export interface AuthButtonProps {
   gameStarted: boolean;
   messages: Message[];
 }
@@ -31,7 +30,6 @@ export const AuthButton = ({ gameStarted, messages }: AuthButtonProps) => {
     } else {
       // Save the game state before logging in
       saveGameStateTemporarily();
-      console.log("Saved in local storage");
 
       // Proceed with login
       await signIn();
@@ -39,26 +37,15 @@ export const AuthButton = ({ gameStarted, messages }: AuthButtonProps) => {
   };
 
   return (
-    <div className="text-player p-2">
+    <div className="hover:text-storyteller text-player">
       {/* If user is logged in */}
 
       {session ? (
-        <div className="text-xs flex justify-between">
-          Hi, {session.user?.name} <br />
-          <ResetButton />
-          <button
-            className="hover:text-storyteller text-sm"
-            onClick={handleAuth}
-          >
-            Log out
-          </button>
-        </div>
+        <button onClick={handleAuth}>Log out</button>
       ) : (
         // If user is not logged in
 
-        <button className="text-sm hover:text-storyteller" onClick={handleAuth}>
-          Login
-        </button>
+        <button onClick={handleAuth}>Login</button>
       )}
     </div>
   );
