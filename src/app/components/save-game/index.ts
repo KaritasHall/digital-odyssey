@@ -19,10 +19,6 @@ export default async function saveGame(adventure: Adventure) {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
-    const data = await response.json();
-    console.log("Adventure saved:", data);
-    // Handle success
   } catch (error) {
     console.error("Error saving adventure:", error);
     // Handle errors

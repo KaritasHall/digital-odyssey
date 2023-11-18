@@ -80,21 +80,13 @@ export default function Chat() {
     setIsModalOpen(false);
 
     if (userChoice === userOptions.optionA) {
-      console.log("Loading from database");
       const data = (await response.json()) as Adventure;
       loadAdventureFromDatabase(data);
       localStorage.removeItem(TEMP_GAME_STATE_LOCALSTORAGE);
     } else if (tempGameState != null && userChoice === userOptions.optionB) {
-      console.log("Loading from local storage");
       const savedAdventure = JSON.parse(tempGameState) as Message[];
       setMessages(savedAdventure);
       localStorage.removeItem(TEMP_GAME_STATE_LOCALSTORAGE);
-    } else {
-      console.log("fetch failed", {
-        response,
-        tempGameState,
-        userChoice,
-      });
     }
     setGameStarted(true);
   };
@@ -261,7 +253,8 @@ export default function Chat() {
             {messages.length >= 2 && (
               <>
                 <form
-                  className="flex-col w-full flex gap-8 items-center justify-center md:items-start animate-fadeIn bottom-0 absolute px-6 xl:p-0 h-[166px] lg:h-[206px]"
+
+                  className="flex-col w-full flex gap-8 items-center justify-center md:items-start animate-fadeIn bottom-0 absolute px-6 lg:px-0 h-[166px] lg:h-[206px]"
                   onSubmit={handleSubmit}
                 >
                   <input
