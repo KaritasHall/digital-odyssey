@@ -30,7 +30,6 @@ export const AuthButton = ({ gameStarted, messages }: AuthButtonProps) => {
     } else {
       // Save the game state before logging in
       saveGameStateTemporarily();
-      console.log("Saved in local storage");
 
       // Proceed with login
       await signIn();
