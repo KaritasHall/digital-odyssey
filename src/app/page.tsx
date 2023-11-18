@@ -8,10 +8,7 @@ import { useEffect } from "react";
 import { useRef } from "react";
 import { ErrorMessage } from "./api/chat/types";
 import { CoffeeButton } from "./components/coffe-button";
-import Link from "next/link";
-import { CoffeeIcon } from "./components/icons/coffee";
-import { GithubIcon } from "./components/icons/github";
-import { LinkedinIcon } from "./components/icons/linkedin";
+import { Footer } from "./components/footer";
 import { useSession } from "next-auth/react";
 import saveGame, { Adventure } from "./components/save-game";
 import { TEMP_GAME_STATE_LOCALSTORAGE } from "./components/auth-button";
@@ -216,7 +213,7 @@ export default function Chat() {
 
           <div className="flex flex-col w-full max-w-[1100px] text-sm lg:text-base h-[calc(100%-44px)] lg:h-[calc(100%-64px)] relative pt-10">
             <div
-              className="overflow-y-scroll adventure-scrollbar relative h-[calc(100%-166px)] lg:h-[calc(100%-206px)] px-6 lg:px-0"
+              className="overflow-y-scroll adventure-scrollbar relative h-[calc(100%-166px)] lg:h-[calc(100%-206px)] px-6 xl:p-0"
               ref={divRef}
             >
               <div className="sticky top-0 w-full bg-gradient-to-b h-6 from-background" />
@@ -264,7 +261,7 @@ export default function Chat() {
             {messages.length >= 2 && (
               <>
                 <form
-                  className="flex-col w-full flex gap-8 items-center justify-center md:items-start animate-fadeIn bottom-0 absolute px-6 lg:px-0 h-[166px] lg:h-[206px]"
+                  className="flex-col w-full flex gap-8 items-center justify-center md:items-start animate-fadeIn bottom-0 absolute px-6 xl:p-0 h-[166px] lg:h-[206px]"
                   onSubmit={handleSubmit}
                 >
                   <input
@@ -284,36 +281,7 @@ export default function Chat() {
               </>
             )}
           </div>
-          {/* Actual height 44px on mobile or 64px for md + */}
-          <footer className="justify-center h-[44px] lg:h-[64px] flex gap-8 text-player">
-            <Link
-              target="_blank"
-              href="www.linkedin.com/in/karitas-w-halldórsdóttir-151b86159"
-            >
-              <LinkedinIcon
-                className="hover:fill-storyteller fill-player"
-                width={24}
-                height={24}
-              />
-            </Link>
-            <Link
-              target="_blank"
-              href="https://github.com/KaritasHall/digital-odyssey"
-            >
-              <GithubIcon
-                className="hover:fill-storyteller fill-player"
-                width={24}
-                height={24}
-              />
-            </Link>
-            <Link target="_blank" href="https://www.buymeacoffee.com/karitas">
-              <CoffeeIcon
-                className="hover:fill-storyteller fill-player"
-                width={24}
-                height={24}
-              />
-            </Link>
-          </footer>
+          <Footer />
         </section>
       ) : (
         <StartScreen startGame={startGame} />

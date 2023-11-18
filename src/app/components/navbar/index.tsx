@@ -9,14 +9,14 @@ export const Navbar = ({ gameStarted, messages }: AuthButtonProps) => {
   const { data: session } = useSession();
 
   return (
-    <div className="p-2 pt-4 px-4">
+    <div className="p-2 pt-4 px-4 fixed w-full">
       {session ? (
         <div className="text-sm lg:text-base flex justify-between items-center">
           <ResetButton />
 
           <div className="flex gap-2 place-items-center">
             <AuthButton gameStarted={gameStarted} messages={messages} />
-            <Avatar.Root className="w-8 h-8 rounded-full">
+            <Avatar.Root className="w-6 h-6 rounded-full">
               <Avatar.Image
                 className="w-full h-full rounded-full"
                 alt="Avatar"
